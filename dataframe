@@ -1,0 +1,48 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Nov 25 17:51:52 2023
+
+@author: gcald
+"""
+
+import pandas as pd
+import statistics
+from datetime import datetime
+
+# Carica i dati dal file Excel# Carica i dati dal file Excel
+# Utilizza 
+df = pd.read_excel("C:\\Users\\gcald\\OneDrive\\Desktop\\esercizio_iannello.xlsx")
+
+
+# Converte la colonna 'data' in formato datetime
+df['data'] = pd.to_datetime(df['data'], format='%d/%m/%Y %H:%M')
+
+# Crea un dizionario vuoto per memorizzare i valori
+dizionario_log = {}
+
+# Itera attraverso le colonne del dataframe
+for colonna in df.columns:
+    dizionario_log[colonna] = df[colonna].tolist()
+
+# Calcola il numero di accessi medio giornaliero
+accessi_giornalieri = df.groupby(df['data'].dt.date).size()
+media_accessi_giornalieri = accessi_giornalieri.mean()
+deviazione_standard_accessi = statistics.stdev(accessi_giornalieri)
+
+# Stampa risultati
+print(f"Numero di accessi medio giornaliero: {media_accessi_giornalieri}")
+print(f"Deviazione standard degli accessi: {deviazione_standard_accessi}")
+
+# Determina gli eventi del giorno con più accessi
+# idxmax_evento: È l'indice dell'evento con il massimo numero di occorrenze.
+# 'evento': È l'etichetta della colonna 'evento' nel DataFrame.
+# Quindi, df.loc[idxmax_evento, 'evento'] restituisce il valore contenuto nella colonna 'evento' alla riga corrispondente all'indice idxmax_evento.
+massimi_eventi_giornalieri = df.groupby(['data', 'evento']).size().groupby('data').idxmax()
+for data, idxmax_evento in massimi_eventi_giornalieri.items():
+    try:
+        idxmax_evento = idxmax_evento[1]  # Ottieni l'indice dell'evento
+        evento = df.loc[idxmax_evento, 'evento']  # Ottieni l'evento usando l'indice
+        count = df[(df['data'] == data) & (df['evento'] == evento)].shape[0]
+        print(f"\nData: {data}\nEvento più frequentemente registrato: {evento}\nNumero di accessi: {count}")
+    except KeyError:
+        print(f"\nData: {data}\nNessun evento trovato per l'indice massimo.")
