@@ -6,8 +6,8 @@ Created on Sat Nov 25 17:51:52 2023
 """
 
 import pandas as pd
-import statistics
 from datetime import datetime
+import statistics
 
 # Carica i dati dal file Excel# Carica i dati dal file Excel
 # Utilizza 
@@ -37,12 +37,11 @@ print(f"Deviazione standard degli accessi: {deviazione_standard_accessi}")
 # idxmax_evento: È l'indice dell'evento con il massimo numero di occorrenze.
 # 'evento': È l'etichetta della colonna 'evento' nel DataFrame.
 # Quindi, df.loc[idxmax_evento, 'evento'] restituisce il valore contenuto nella colonna 'evento' alla riga corrispondente all'indice idxmax_evento.
-massimi_eventi_giornalieri = df.groupby(['data', 'evento']).size().groupby('data').idxmax()
-for data, idxmax_evento in massimi_eventi_giornalieri.items():
-    try:
-        idxmax_evento = idxmax_evento[1]  # Ottieni l'indice dell'evento
-        evento = df.loc[idxmax_evento, 'evento']  # Ottieni l'evento usando l'indice
-        count = df[(df['data'] == data) & (df['evento'] == evento)].shape[0]
-        print(f"\nData: {data}\nEvento più frequentemente registrato: {evento}\nNumero di accessi: {count}")
-    except KeyError:
-        print(f"\nData: {data}\nNessun evento trovato per l'indice massimo.")
+massimi_eventi_giornalieri = df.groupby(['data', 'evento']).size().reset_index(name='count')
+idxmax_eventi = massimi_eventi_giornalieri.groupby('data')['count'].idxmax()
+for idx in idxmax_eventi:
+    row = massimi_eventi_giornalieri.loc[idx]
+    data = row['data']
+    evento = row['evento']
+    count = row['count']
+    print(f"\nData: {data}\nEvento più frequentemente registrato: {evento}\nNumero di accessi: {count}")
